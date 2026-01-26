@@ -13,6 +13,7 @@ interface TemplatesListProps {
   onBodyChange: (body: string) => void;
   onSave: (gradeRange: GradeRange) => void;
   onCancel: () => void;
+  savingTemplate: GradeRange | null;
 }
 
 export default function TemplatesList({
@@ -25,6 +26,7 @@ export default function TemplatesList({
   onBodyChange,
   onSave,
   onCancel,
+  savingTemplate,
 }: TemplatesListProps) {
   const gradeRanges: GradeRange[] = ['A', 'BC', 'DF'];
 
@@ -42,6 +44,7 @@ export default function TemplatesList({
             subject={templateSubject}
             body={templateBody}
             isEditing={isEditing}
+            isSaving={savingTemplate === range}
             onSubjectChange={onSubjectChange}
             onBodyChange={onBodyChange}
             onStartEdit={() => onStartEdit(template, range)}

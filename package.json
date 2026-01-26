@@ -19,6 +19,8 @@
     "pg": "^8.17.2",
     "react": "^18",
     "react-dom": "^18",
+    "react-simple-wysiwyg": "^3.4.1",
+    "react-spinners": "^0.17.0",
     "react-toastify": "^11.0.5"
   },
   "devDependencies": {

@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import Spinner from './Spinner';
 
 interface Column<T> {
   header: string;
@@ -24,7 +25,9 @@ export default function DataTable<T extends { id: string }>({
   if (loading) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-8 text-center text-slate">Loading...</div>
+        <div className="p-8 flex items-center justify-center text-slate">
+          <Spinner size={24} color="#0f766e" />
+        </div>
       </div>
     );
   }

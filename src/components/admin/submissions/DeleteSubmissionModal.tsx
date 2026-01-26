@@ -2,17 +2,20 @@
 
 import { Submission } from '@/types';
 import Modal from '../shared/Modal';
+import Spinner from '../shared/Spinner';
 
 interface DeleteSubmissionModalProps {
   submission: Submission | null;
   onClose: () => void;
   onConfirm: () => void;
+  isDeleting: boolean;
 }
 
 export default function DeleteSubmissionModal({
   submission,
   onClose,
   onConfirm,
+  isDeleting,
 }: DeleteSubmissionModalProps) {
   return (
     <Modal isOpen={!!submission} onClose={onClose} title="Delete Submission" maxWidth="md">
@@ -23,13 +26,22 @@ export default function DeleteSubmissionModal({
         <div className="flex flex-col sm:flex-row gap-2">
           <button
             onClick={onConfirm}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            disabled={isDeleting}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Delete
+            {isDeleting ? (
+              <span className="inline-flex items-center gap-2">
+                <Spinner size={16} color="#ffffff" />
+                Deleting...
+              </span>
+            ) : (
+              'Delete'
+            )}
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-white border border-gray-200 text-slate rounded-lg hover:bg-gray-50 transition-colors"
+            disabled={isDeleting}
+            className="px-4 py-2 bg-white border border-gray-200 text-slate rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             Cancel
           </button>

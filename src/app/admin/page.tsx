@@ -23,6 +23,7 @@ import SubmissionFormModal from '@/components/admin/submissions/SubmissionFormMo
 import DeleteSubmissionModal from '@/components/admin/submissions/DeleteSubmissionModal';
 import Pagination from '@/components/admin/submissions/Pagination';
 import TemplatesList from '@/components/admin/templates/TemplatesList';
+import Spinner from '@/components/admin/shared/Spinner';
 
 interface PaginationInfo {
   page: number;
@@ -60,11 +61,14 @@ export default function AdminPage() {
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [stats, setStats] = useState<Stats>({ total: 0, withEmail: 0 });
   const [loading, setLoading] = useState(false);
+  const [isSavingSubmission, setIsSavingSubmission] = useState(false);
+  const [isDeletingSubmission, setIsDeletingSubmission] = useState(false);
 
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [editingTemplate, setEditingTemplate] = useState<GradeRange | null>(null);
   const [templateSubject, setTemplateSubject] = useState('');
   const [templateBody, setTemplateBody] = useState('');
+  const [savingTemplateRange, setSavingTemplateRange] = useState<GradeRange | null>(null);
 
   // Filters
   const [filterGrade, setFilterGrade] = useState('');
@@ -241,6 +245,8 @@ export default function AdminPage() {
   };
 
   const handleSaveSubmission = async (formData: SubmissionFormData) => {
+    if (isSavingSubmission) return;
+    setIsSavingSubmission(true);
     try {
       const url = '/api/submissions';
       const method = editingSubmission ? 'PUT' : 'POST';
@@ -266,12 +272,16 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Failed to save submission:', error);
       toast.error('Failed to save submission. Please try again.');
+    } finally {
+      setIsSavingSubmission(false);
     }
   };
 
   const handleDeleteSubmission = async () => {
     if (!deletingSubmission) return;
 
+    if (isDeletingSubmission) return;
+    setIsDeletingSubmission(true);
     try {
       const response = await fetch(`/api/submissions?id=${deletingSubmission.id}`, {
         method: 'DELETE',
@@ -286,10 +296,14 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Failed to delete submission:', error);
       toast.error('Failed to delete submission. Please try again.');
+    } finally {
+      setIsDeletingSubmission(false);
     }
   };
 
   const handleSaveTemplate = async (gradeRange: GradeRange) => {
+    if (savingTemplateRange) return;
+    setSavingTemplateRange(gradeRange);
     try {
       const response = await fetch('/api/email-templates', {
         method: 'PUT',
@@ -312,6 +326,8 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Failed to save template:', error);
       toast.error('Failed to save template. Please try again.');
+    } finally {
+      setSavingTemplateRange(null);
     }
   };
 
@@ -325,7 +341,7 @@ export default function AdminPage() {
   if (checkingAuth) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
-        <div className="text-slate">Loading...</div>
+        <Spinner size={28} color="#0f766e" />
       </div>
     );
   }
@@ -377,6 +393,7 @@ export default function AdminPage() {
                   }}
                   onExportCSV={exportToCSV}
                   onAddSubmission={openAddModal}
+                  isLoading={loading}
                 />
 
                 <SubmissionsTable
@@ -412,12 +429,14 @@ export default function AdminPage() {
                   editingSubmission={editingSubmission}
                   formData={submissionForm}
                   onFormChange={setSubmissionForm}
+                  isSaving={isSavingSubmission}
                 />
 
                 <DeleteSubmissionModal
                   submission={deletingSubmission}
                   onClose={() => setDeletingSubmission(null)}
                   onConfirm={handleDeleteSubmission}
+                  isDeleting={isDeletingSubmission}
                 />
               </>
             )}
@@ -434,6 +453,7 @@ export default function AdminPage() {
                 onBodyChange={setTemplateBody}
                 onSave={handleSaveTemplate}
                 onCancel={() => setEditingTemplate(null)}
+                  savingTemplate={savingTemplateRange}
               />
             )}
           </div>

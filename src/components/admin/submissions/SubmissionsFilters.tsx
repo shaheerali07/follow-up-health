@@ -1,5 +1,7 @@
 'use client';
 
+import Spinner from '../shared/Spinner';
+
 interface SubmissionsFiltersProps {
   filterGrade: string;
   filterEmail: string;
@@ -8,6 +10,7 @@ interface SubmissionsFiltersProps {
   onApplyFilters: () => void;
   onExportCSV: () => void;
   onAddSubmission: () => void;
+  isLoading: boolean;
 }
 
 export default function SubmissionsFilters({
@@ -18,6 +21,7 @@ export default function SubmissionsFilters({
   onApplyFilters,
   onExportCSV,
   onAddSubmission,
+  isLoading,
 }: SubmissionsFiltersProps) {
   return (
     <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-6">
@@ -52,9 +56,17 @@ export default function SubmissionsFilters({
           </div>
           <button
             onClick={onApplyFilters}
-            className="w-full sm:w-auto px-4 py-2 bg-teal text-white rounded-lg hover:bg-teal-600 transition-colors text-sm font-medium"
+            disabled={isLoading}
+            className="w-full sm:w-auto px-4 py-2 bg-teal text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Apply Filters
+            {isLoading ? (
+              <span className="inline-flex items-center gap-2">
+                <Spinner size={14} color="#ffffff" />
+                Applying...
+              </span>
+            ) : (
+              'Apply Filters'
+            )}
           </button>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">

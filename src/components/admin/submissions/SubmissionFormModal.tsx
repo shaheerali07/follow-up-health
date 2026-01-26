@@ -2,6 +2,7 @@
 
 import { Submission, ResponseTime, FollowUpDepth, PatientValue, AfterHoursCoverage } from '@/types';
 import Modal from '../shared/Modal';
+import Spinner from '../shared/Spinner';
 
 interface SubmissionFormData {
   monthly_inquiries: number;
@@ -19,6 +20,7 @@ interface SubmissionFormModalProps {
   editingSubmission: Submission | null;
   formData: SubmissionFormData;
   onFormChange: (data: SubmissionFormData) => void;
+  isSaving: boolean;
 }
 
 export default function SubmissionFormModal({
@@ -28,9 +30,11 @@ export default function SubmissionFormModal({
   editingSubmission,
   formData,
   onFormChange,
+  isSaving,
 }: SubmissionFormModalProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSaving) return;
     onSubmit(formData);
   };
 
@@ -131,14 +135,23 @@ export default function SubmissionFormModal({
         <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
           <button
             type="submit"
-            className="px-4 py-2 bg-teal text-white rounded-lg hover:bg-teal-600 transition-colors"
+            disabled={isSaving}
+            className="px-4 py-2 bg-teal text-white rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Save
+            {isSaving ? (
+              <span className="inline-flex items-center gap-2">
+                <Spinner size={16} color="#ffffff" />
+                Saving...
+              </span>
+            ) : (
+              'Save'
+            )}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-white border border-gray-200 text-slate rounded-lg hover:bg-gray-50 transition-colors"
+            disabled={isSaving}
+            className="px-4 py-2 bg-white border border-gray-200 text-slate rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             Cancel
           </button>

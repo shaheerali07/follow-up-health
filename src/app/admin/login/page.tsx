@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Spinner from '@/components/admin/shared/Spinner';
 
 function LoginForm() {
   const router = useRouter();
@@ -98,7 +99,13 @@ export default function AdminLoginPage() {
           <p className="text-slate text-sm">Sign in to access the Follow-Up Health Dashboard</p>
         </div>
 
-        <Suspense fallback={<div className="text-center text-slate">Loading...</div>}>
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center py-6 text-slate">
+              <Spinner size={22} color="#0f766e" />
+            </div>
+          }
+        >
           <LoginForm />
         </Suspense>
       </div>
