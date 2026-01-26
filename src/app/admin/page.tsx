@@ -65,7 +65,6 @@ export default function AdminPage() {
   const [editingTemplate, setEditingTemplate] = useState<GradeRange | null>(null);
   const [templateSubject, setTemplateSubject] = useState('');
   const [templateBody, setTemplateBody] = useState('');
-  const [templateConfig, setTemplateConfig] = useState('');
 
   // Filters
   const [filterGrade, setFilterGrade] = useState('');
@@ -292,17 +291,6 @@ export default function AdminPage() {
 
   const handleSaveTemplate = async (gradeRange: GradeRange) => {
     try {
-      // Validate config JSON if provided
-      let configObj = null;
-      if (templateConfig.trim()) {
-        try {
-          configObj = JSON.parse(templateConfig);
-        } catch {
-          toast.error('Config must be valid JSON');
-          return;
-        }
-      }
-
       const response = await fetch('/api/email-templates', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -310,13 +298,11 @@ export default function AdminPage() {
           grade_range: gradeRange,
           subject: templateSubject,
           body: templateBody,
-          config: configObj ? JSON.stringify(configObj) : null,
         }),
       });
 
       if (response.ok) {
         setEditingTemplate(null);
-        setTemplateConfig('');
         fetchTemplates();
         toast.success('Template saved successfully');
       } else {
@@ -333,17 +319,6 @@ export default function AdminPage() {
     setEditingTemplate(gradeRange);
     setTemplateSubject(template?.subject || '');
     setTemplateBody(template?.body || '');
-    // Parse config if it exists
-    if (template?.config) {
-      try {
-        const parsed = JSON.parse(template.config);
-        setTemplateConfig(JSON.stringify(parsed, null, 2));
-      } catch {
-        setTemplateConfig(template.config);
-      }
-    } else {
-      setTemplateConfig('{\n  "cta_url": ""\n}');
-    }
   };
 
   // Show loading while checking auth
@@ -454,16 +429,11 @@ export default function AdminPage() {
                 editingTemplate={editingTemplate}
                 templateSubject={templateSubject}
                 templateBody={templateBody}
-                templateConfig={templateConfig}
                 onStartEdit={startEditingTemplate}
                 onSubjectChange={setTemplateSubject}
                 onBodyChange={setTemplateBody}
-                onConfigChange={setTemplateConfig}
                 onSave={handleSaveTemplate}
-                onCancel={() => {
-                  setEditingTemplate(null);
-                  setTemplateConfig('');
-                }}
+                onCancel={() => setEditingTemplate(null)}
               />
             )}
           </div>

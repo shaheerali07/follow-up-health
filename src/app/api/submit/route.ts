@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, queryOne } from '@/lib/db';
-import { sendEmail, generateSnapshotHtml } from '@/lib/mailgun';
+import { sendEmail, generateSnapshotBlock, buildEmailHtml } from '@/lib/mailgun';
 import { getGradeRange } from '@/lib/scoring';
 import { DRIVERS } from '@/lib/drivers';
 import { CalculatorInputs, CalculationResults, DriverCode } from '@/types';
@@ -55,9 +55,14 @@ export async function POST(request: NextRequest) {
 
     // Send email if provided
     if (email) {
-      const gradeRange = getGradeRange(results.grade);
+      const timestamp = new Date().toISOString();
+      console.log(`[${timestamp}] [SUBMIT] Preparing to send email for submission`);
+      console.log(`[${timestamp}] [SUBMIT] Email: ${email}`);
+      console.log(`[${timestamp}] [SUBMIT] Grade: ${results.grade}`);
 
-      // Try to fetch custom template from DB
+      const gradeRange = getGradeRange(results.grade);
+      console.log(`[${timestamp}] [SUBMIT] Grade range: ${gradeRange}`);
+
       const template = await queryOne<{
         subject: string;
         body: string;
@@ -67,9 +72,14 @@ export async function POST(request: NextRequest) {
         [gradeRange]
       );
 
-      // Generate email HTML
+      if (template) {
+        console.log(`[${timestamp}] [SUBMIT] Template found for grade range ${gradeRange}`);
+      } else {
+        console.log(`[${timestamp}] [SUBMIT] No template found for grade range ${gradeRange}, using defaults`);
+      }
+
       const driverTitles = drivers.map((code) => DRIVERS[code].title);
-      const snapshotHtml = generateSnapshotHtml({
+      const snapshotBlock = generateSnapshotBlock({
         grade: results.grade,
         riskLow: results.revenueAtRisk.low,
         riskHigh: results.revenueAtRisk.high,
@@ -78,36 +88,54 @@ export async function POST(request: NextRequest) {
         scores: results.scores,
       });
 
-      // Parse config if available
-      let config: Record<string, string> = {};
+      let ctaUrl = process.env.NEXT_PUBLIC_APP_URL || '';
       if (template?.config) {
         try {
-          config = JSON.parse(template.config);
-        } catch (e) {
-          console.error('Failed to parse template config:', e);
+          const config = JSON.parse(template.config) as Record<string, string>;
+          if (config.cta_url) {
+            ctaUrl = config.cta_url;
+            console.log(`[${timestamp}] [SUBMIT] Using custom CTA URL from template config`);
+          }
+        } catch {
+          console.warn(`[${timestamp}] [SUBMIT] Failed to parse template config, using default CTA URL`);
         }
       }
 
-      // Use custom subject if available, otherwise use default
-      const subject = template?.subject || `Your Follow-Up Health Score: ${results.grade}`;
+      const subject = template?.subject ?? `Your Follow-Up Health Score: ${results.grade}`;
+      const customContent = template?.body?.trim() ?? '';
 
-      // Use template body if available, otherwise use generated HTML
-      let emailHtml = snapshotHtml;
-      if (template?.body) {
-        emailHtml = template.body
-          .replace(/\{\{snapshot_html\}\}/g, snapshotHtml)
-          .replace(/\{\{cta_url\}\}/g, config.cta_url || process.env.NEXT_PUBLIC_APP_URL || '')
-          .replace(/\{\{grade\}\}/g, results.grade)
-          .replace(/\{\{risk_low\}\}/g, results.revenueAtRisk.low.toLocaleString())
-          .replace(/\{\{risk_high\}\}/g, results.revenueAtRisk.high.toLocaleString())
-          .replace(/\{\{dropoff_percent\}\}/g, results.dropoffPercent.toString());
-      }
+      console.log(`[${timestamp}] [SUBMIT] Email subject: ${subject}`);
+      console.log(`[${timestamp}] [SUBMIT] Custom content length: ${customContent.length} characters`);
 
-      await sendEmail({
+      const emailHtml = buildEmailHtml({
+        customContent,
+        snapshotBlock,
+        ctaUrl,
+        placeholders: {
+          grade: results.grade,
+          risk_low: results.revenueAtRisk.low.toLocaleString(),
+          risk_high: results.revenueAtRisk.high.toLocaleString(),
+          dropoff_percent: String(results.dropoffPercent),
+        },
+      });
+
+      console.log(`[${timestamp}] [SUBMIT] Email HTML generated (${emailHtml.length} characters)`);
+      console.log(`[${timestamp}] [SUBMIT] Calling sendEmail...`);
+
+      const emailSent = await sendEmail({
         to: email,
         subject,
         html: emailHtml,
       });
+
+      if (emailSent) {
+        console.log(`[${timestamp}] [SUBMIT] ✓ Email sent successfully for submission`);
+      } else {
+        console.error(`[${timestamp}] [SUBMIT] ✗ Failed to send email for submission`);
+      }
+    } else {
+      const timestamp = new Date().toISOString();
+      console.log(`[${timestamp}] [SUBMIT] No email provided, skipping email send`);
     }
 
     return NextResponse.json({ success: true });

@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query, queryOne } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 import { Submission, CalculatorInputs } from '@/types';
-import { calculateResults } from '@/lib/scoring';
+import { calculateResults, getGradeRange } from '@/lib/scoring';
 import { getTopDriverCodes } from '@/lib/drivers';
+import { sendEmail, generateSnapshotBlock, buildEmailHtml } from '@/lib/mailgun';
+import { DRIVERS } from '@/lib/drivers';
 
 // Check if user is authenticated via cookie
 async function isAuthorized(): Promise<boolean> {
@@ -204,6 +206,111 @@ export async function POST(request: NextRequest) {
         email || null,
       ]
     );
+
+    if (!submission) {
+      return NextResponse.json(
+        { error: 'Failed to create submission' },
+        { status: 500 }
+      );
+    }
+
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] [ADMIN] Submission created successfully`);
+    console.log(`[${timestamp}] [ADMIN] Submission ID: ${submission.id}`);
+    console.log(`[${timestamp}] [ADMIN] Grade: ${results.grade}`);
+
+    // Send email if provided
+    if (email) {
+      console.log(`[${timestamp}] [ADMIN] Email provided, preparing to send email`);
+      console.log(`[${timestamp}] [ADMIN] Email: ${email}`);
+
+      try {
+        const gradeRange = getGradeRange(results.grade);
+        console.log(`[${timestamp}] [ADMIN] Grade range: ${gradeRange}`);
+
+        const template = await queryOne<{
+          subject: string;
+          body: string;
+          config?: string | null;
+        }>(
+          'SELECT subject, body, config FROM email_templates WHERE grade_range = $1',
+          [gradeRange]
+        );
+
+        if (template) {
+          console.log(`[${timestamp}] [ADMIN] Template found for grade range ${gradeRange}`);
+        } else {
+          console.log(`[${timestamp}] [ADMIN] No template found for grade range ${gradeRange}, using defaults`);
+        }
+
+        const driverTitles = drivers.map((code) => DRIVERS[code].title);
+        const snapshotBlock = generateSnapshotBlock({
+          grade: results.grade,
+          riskLow: results.revenueAtRisk.low,
+          riskHigh: results.revenueAtRisk.high,
+          dropoffPercent: results.dropoffPercent,
+          drivers: driverTitles,
+          scores: results.scores,
+        });
+
+        let ctaUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+        if (template?.config) {
+          try {
+            const config = JSON.parse(template.config) as Record<string, string>;
+            if (config.cta_url) {
+              ctaUrl = config.cta_url;
+              console.log(`[${timestamp}] [ADMIN] Using custom CTA URL from template config`);
+            }
+          } catch {
+            console.warn(`[${timestamp}] [ADMIN] Failed to parse template config, using default CTA URL`);
+          }
+        }
+
+        const subject = template?.subject ?? `Your Follow-Up Health Score: ${results.grade}`;
+        const customContent = template?.body?.trim() ?? '';
+
+        console.log(`[${timestamp}] [ADMIN] Email subject: ${subject}`);
+        console.log(`[${timestamp}] [ADMIN] Custom content length: ${customContent.length} characters`);
+
+        const emailHtml = buildEmailHtml({
+          customContent,
+          snapshotBlock,
+          ctaUrl,
+          placeholders: {
+            grade: results.grade,
+            risk_low: results.revenueAtRisk.low.toLocaleString(),
+            risk_high: results.revenueAtRisk.high.toLocaleString(),
+            dropoff_percent: String(results.dropoffPercent),
+          },
+        });
+
+        console.log(`[${timestamp}] [ADMIN] Email HTML generated (${emailHtml.length} characters)`);
+        console.log(`[${timestamp}] [ADMIN] Calling sendEmail...`);
+
+        const emailSent = await sendEmail({
+          to: email,
+          subject,
+          html: emailHtml,
+        });
+
+        if (emailSent) {
+          console.log(`[${timestamp}] [ADMIN] ✓ Email sent successfully for manually created submission`);
+          console.log(`[${timestamp}] [ADMIN] Submission ID: ${submission.id}`);
+        } else {
+          console.error(`[${timestamp}] [ADMIN] ✗ Failed to send email for manually created submission`);
+          console.error(`[${timestamp}] [ADMIN] Submission ID: ${submission.id}`);
+        }
+      } catch (emailError) {
+        console.error(`[${timestamp}] [ADMIN] Error sending email for submission ${submission.id}:`, emailError);
+        // Don't fail the submission creation if email fails
+      }
+    } else if (email) {
+      const timestamp = new Date().toISOString();
+      console.log(`[${timestamp}] [ADMIN] Email provided but submission not created, skipping email send`);
+    } else {
+      const timestamp = new Date().toISOString();
+      console.log(`[${timestamp}] [ADMIN] No email provided, skipping email send`);
+    }
 
     return NextResponse.json({ submission }, { status: 201 });
   } catch (error) {

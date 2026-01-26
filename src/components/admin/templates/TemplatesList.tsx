@@ -8,11 +8,9 @@ interface TemplatesListProps {
   editingTemplate: GradeRange | null;
   templateSubject: string;
   templateBody: string;
-  templateConfig: string;
   onStartEdit: (template: EmailTemplate | null, gradeRange: GradeRange) => void;
   onSubjectChange: (subject: string) => void;
   onBodyChange: (body: string) => void;
-  onConfigChange: (config: string) => void;
   onSave: (gradeRange: GradeRange) => void;
   onCancel: () => void;
 }
@@ -22,11 +20,9 @@ export default function TemplatesList({
   editingTemplate,
   templateSubject,
   templateBody,
-  templateConfig,
   onStartEdit,
   onSubjectChange,
   onBodyChange,
-  onConfigChange,
   onSave,
   onCancel,
 }: TemplatesListProps) {
@@ -45,11 +41,9 @@ export default function TemplatesList({
             gradeRange={range}
             subject={templateSubject}
             body={templateBody}
-            config={templateConfig}
             isEditing={isEditing}
             onSubjectChange={onSubjectChange}
             onBodyChange={onBodyChange}
-            onConfigChange={onConfigChange}
             onStartEdit={() => onStartEdit(template, range)}
             onSave={() => onSave(range)}
             onCancel={onCancel}

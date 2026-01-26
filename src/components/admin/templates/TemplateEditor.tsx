@@ -7,11 +7,9 @@ interface TemplateEditorProps {
   gradeRange: GradeRange;
   subject: string;
   body: string;
-  config: string;
   isEditing: boolean;
   onSubjectChange: (subject: string) => void;
   onBodyChange: (body: string) => void;
-  onConfigChange: (config: string) => void;
   onStartEdit: () => void;
   onSave: () => void;
   onCancel: () => void;
@@ -22,11 +20,9 @@ export default function TemplateEditor({
   gradeRange,
   subject,
   body,
-  config,
   isEditing,
   onSubjectChange,
   onBodyChange,
-  onConfigChange,
   onStartEdit,
   onSave,
   onCancel,
@@ -69,10 +65,10 @@ export default function TemplateEditor({
               onChange={(e) => onBodyChange(e.target.value)}
               rows={6}
               className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal font-mono text-sm"
-              placeholder="Use {{snapshot_html}} to insert the snapshot HTML, {{cta_url}} for CTA URL, {{grade}}, {{risk_low}}, {{risk_high}}, {{dropoff_percent}} for dynamic values"
+              placeholder="Your custom message appears in the email before the grade, revenue, and scores. Use {{snapshot_html}} to insert the stats block exactly where you want it; otherwise it is appended after your message."
             />
             <p className="text-xs text-slate mt-1">
-              Available placeholders: {`{{snapshot_html}}`}, {`{{cta_url}}`}, {`{{grade}}`},{' '}
+              Placeholders: {`{{snapshot_html}}`} (stats block), {`{{cta_url}}`}, {`{{grade}}`},{' '}
               {`{{risk_low}}`}, {`{{risk_high}}`}, {`{{dropoff_percent}}`}
             </p>
           </div>
