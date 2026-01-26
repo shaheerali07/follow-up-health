@@ -11,9 +11,9 @@ export default function StatsCard({ label, value, valueColor = 'navy' }: StatsCa
   };
 
   return (
-    <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-      <p className="text-sm text-slate">{label}</p>
-      <p className={`text-3xl font-bold ${colorClasses[valueColor]}`}>{value}</p>
+    <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-gray-100">
+      <p className="text-xs sm:text-sm text-slate mb-1">{label}</p>
+      <p className={`text-2xl sm:text-3xl font-bold ${colorClasses[valueColor]}`}>{value}</p>
     </div>
   );
 }

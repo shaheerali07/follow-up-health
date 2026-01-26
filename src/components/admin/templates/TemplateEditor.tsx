@@ -55,12 +55,12 @@ export default function TemplateEditor({
 
   return (
     <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
-        <h3 className="text-lg font-semibold text-navy">{getTemplateTitle(gradeRange)}</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-base sm:text-lg font-semibold text-navy">{getTemplateTitle(gradeRange)}</h3>
         {!isEditing && (
           <button
             onClick={onStartEdit}
-            className="text-sm text-teal hover:underline whitespace-nowrap"
+            className="text-sm text-teal hover:underline whitespace-nowrap font-medium"
           >
             Edit
           </button>
@@ -70,73 +70,91 @@ export default function TemplateEditor({
       {isEditing ? (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-navy mb-1">Subject</label>
+            <label className="block text-sm font-medium text-navy mb-1.5">Subject</label>
             <input
               type="text"
               value={subject}
               onChange={(e) => onSubjectChange(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal"
+              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal text-sm"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-navy mb-1">Body</label>
+            <label className="block text-sm font-medium text-navy mb-1.5">Body</label>
+            {/* Custom styles for the WYSIWYG editor on mobile */}
+            <style jsx global>{`
+              .rsw-editor {
+                font-size: 14px !important;
+              }
+              .rsw-toolbar {
+                flex-wrap: wrap !important;
+                gap: 2px !important;
+                padding: 6px !important;
+              }
+              .rsw-toolbar button,
+              .rsw-toolbar select {
+                padding: 4px 6px !important;
+                min-width: 28px !important;
+                font-size: 12px !important;
+              }
+              @media (max-width: 640px) {
+                .rsw-toolbar {
+                  justify-content: flex-start !important;
+                }
+                .rsw-toolbar select {
+                  max-width: 80px !important;
+                }
+              }
+            `}</style>
             <div className="border border-gray-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-teal">
               <Editor
                 value={editorValue}
                 onChange={handleEditorChange}
                 containerProps={{
                   style: {
-                    minHeight: '200px',
+                    minHeight: '120px',
                     fontFamily: 'inherit',
                     padding: '0.75rem',
+                    fontSize: '14px',
                   },
                 }}
               />
             </div>
-            <p className="text-xs text-slate mt-1">
-              Placeholders: {`{{snapshot_html}}`} (stats block), {`{{cta_url}}`}, {`{{grade}}`},{' '}
-              {`{{risk_low}}`}, {`{{risk_high}}`}, {`{{dropoff_percent}}`}
-            </p>
-            <p className="text-xs text-slate mt-1">
-              Use the editor to format your message. HTML will be stored and rendered in emails.
-            </p>
+            <details className="mt-2">
+              <summary className="text-xs text-slate font-medium cursor-pointer py-2">
+                View available placeholders
+              </summary>
+              <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                <div className="flex flex-wrap gap-1.5">
+                  <code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs">{`{{snapshot_html}}`}</code>
+                  <code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs">{`{{cta_url}}`}</code>
+                  <code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs">{`{{grade}}`}</code>
+                  <code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs">{`{{risk_low}}`}</code>
+                  <code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs">{`{{risk_high}}`}</code>
+                </div>
+              </div>
+            </details>
           </div>
-          {/* <div>
-            <label className="block text-sm font-medium text-navy mb-1">
-              Config (JSON) - Optional constants
-            </label>
-            <textarea
-              value={config}
-              onChange={(e) => onConfigChange(e.target.value)}
-              rows={4}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal font-mono text-sm"
-              placeholder='{"cta_url": "https://example.com"}'
-            />
-            <p className="text-xs text-slate mt-1">
-              JSON object for configurable values (e.g., CTA URL). Leave empty to use defaults.
-            </p>
-          </div> */}
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 pt-2">
+            <button
+              onClick={onCancel}
+              disabled={isSaving}
+              className="w-full sm:w-auto px-4 py-2.5 bg-white border border-gray-200 text-slate rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed text-sm font-medium"
+            >
+              Cancel
+            </button>
             <button
               onClick={onSave}
               disabled={isSaving}
-              className="px-4 py-2 bg-teal text-white rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto px-4 py-2.5 bg-teal text-white rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed text-sm font-medium"
             >
               {isSaving ? (
-                <span className="inline-flex items-center gap-2">
+                <span className="inline-flex items-center justify-center gap-2">
                   <Spinner size={16} color="#ffffff" />
                   Saving...
                 </span>
               ) : (
-                'Save'
+                'Save Template'
               )}
-            </button>
-            <button
-              onClick={onCancel}
-              disabled={isSaving}
-              className="px-4 py-2 bg-white border border-gray-200 text-slate rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              Cancel
             </button>
           </div>
         </div>
@@ -144,15 +162,19 @@ export default function TemplateEditor({
         <div>
           {template ? (
             <>
-              <p className="text-sm text-slate mb-2">
-                <strong>Subject:</strong> {template.subject}
-              </p>
-              <div
-                className="text-sm text-slate break-words prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ __html: template.body || '' }}
-              />
-              <p className="text-xs text-slate mt-4">
-                Last updated: {new Date(template.updated_at).toLocaleString()}
+              <div className="mb-3">
+                <span className="text-xs text-slate uppercase tracking-wide">Subject</span>
+                <p className="text-sm text-navy font-medium mt-0.5">{template.subject}</p>
+              </div>
+              <div className="mb-3">
+                <span className="text-xs text-slate uppercase tracking-wide">Content</span>
+                <div
+                  className="text-sm text-slate break-words prose prose-sm max-w-none mt-1 p-3 bg-gray-50 rounded-lg"
+                  dangerouslySetInnerHTML={{ __html: template.body || '' }}
+                />
+              </div>
+              <p className="text-xs text-slate/60">
+                Updated: {new Date(template.updated_at).toLocaleDateString()}
               </p>
             </>
           ) : (

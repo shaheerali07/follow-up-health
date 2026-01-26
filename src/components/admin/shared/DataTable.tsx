@@ -5,6 +5,10 @@ interface Column<T> {
   header: string;
   accessor: keyof T | ((row: T) => ReactNode);
   className?: string;
+  /** Hide this column on mobile (card view will still show it) */
+  hideOnMobile?: boolean;
+  /** Show this column prominently in mobile card view */
+  mobileHighlight?: boolean;
 }
 
 interface DataTableProps<T> {
@@ -13,6 +17,8 @@ interface DataTableProps<T> {
   loading?: boolean;
   emptyMessage?: string;
   onRowClick?: (row: T) => void;
+  /** Use card layout on mobile instead of horizontal scroll table */
+  mobileCardView?: boolean;
 }
 
 export default function DataTable<T extends { id: string }>({
@@ -21,6 +27,7 @@ export default function DataTable<T extends { id: string }>({
   loading = false,
   emptyMessage = 'No data available',
   onRowClick,
+  mobileCardView = true,
 }: DataTableProps<T>) {
   if (loading) {
     return (
@@ -40,9 +47,62 @@ export default function DataTable<T extends { id: string }>({
     );
   }
 
-  return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="overflow-x-auto -mx-4 sm:mx-0">
+  const getCellContent = (row: T, column: Column<T>) => {
+    return typeof column.accessor === 'function'
+      ? column.accessor(row)
+      : String(row[column.accessor]);
+  };
+
+  // Mobile card view
+  const MobileCardView = () => (
+    <div className="md:hidden space-y-3">
+      {data.map((row) => (
+        <div
+          key={row.id}
+          onClick={() => onRowClick?.(row)}
+          className={`bg-white rounded-xl shadow-sm border border-gray-100 p-4 ${
+            onRowClick ? 'cursor-pointer active:bg-gray-50' : ''
+          }`}
+        >
+          {/* Highlighted columns at top */}
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            {columns
+              .filter((col) => col.mobileHighlight)
+              .map((column, index) => (
+                <div key={index} className="font-medium">
+                  {getCellContent(row, column)}
+                </div>
+              ))}
+          </div>
+          {/* Other columns in grid */}
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            {columns
+              .filter((col) => !col.mobileHighlight && col.header !== 'Actions')
+              .map((column, index) => (
+                <div key={index}>
+                  <span className="text-slate text-xs">{column.header}</span>
+                  <div className="text-navy">{getCellContent(row, column)}</div>
+                </div>
+              ))}
+          </div>
+          {/* Actions at bottom */}
+          {columns.some((col) => col.header === 'Actions') && (
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              {getCellContent(
+                row,
+                columns.find((col) => col.header === 'Actions')!
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
+  // Desktop table view
+  const DesktopTableView = () => (
+    <div className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden ${mobileCardView ? 'hidden md:block' : ''}`}>
+      <div className="overflow-x-auto">
         <div className="inline-block min-w-full align-middle">
           <table className="min-w-full divide-y divide-gray-100">
             <thead className="bg-gray-50">
@@ -52,7 +112,7 @@ export default function DataTable<T extends { id: string }>({
                     key={index}
                     className={`px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-navy ${
                       column.className || ''
-                    }`}
+                    } ${column.hideOnMobile ? 'hidden md:table-cell' : ''}`}
                   >
                     {column.header}
                   </th>
@@ -71,11 +131,9 @@ export default function DataTable<T extends { id: string }>({
                       key={index}
                       className={`px-3 sm:px-4 py-3 text-xs sm:text-sm text-slate ${
                         column.className || ''
-                      }`}
+                      } ${column.hideOnMobile ? 'hidden md:table-cell' : ''}`}
                     >
-                      {typeof column.accessor === 'function'
-                        ? column.accessor(row)
-                        : String(row[column.accessor])}
+                      {getCellContent(row, column)}
                     </td>
                   ))}
                 </tr>
@@ -85,5 +143,12 @@ export default function DataTable<T extends { id: string }>({
         </div>
       </div>
     </div>
+  );
+
+  return (
+    <>
+      {mobileCardView && <MobileCardView />}
+      <DesktopTableView />
+    </>
   );
 }

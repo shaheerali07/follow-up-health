@@ -354,13 +354,13 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
       <AdminHeader user={user} />
+      <MobileNav activeModule={activeModule} onModuleChange={setActiveModule} />
 
       <div className="flex flex-1 overflow-hidden">
         <AdminSidebar activeModule={activeModule} onModuleChange={setActiveModule} />
-        <MobileNav activeModule={activeModule} onModuleChange={setActiveModule} />
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
           <div className="p-4 sm:p-6">
             {/* Module Header */}
             <div className="mb-6">

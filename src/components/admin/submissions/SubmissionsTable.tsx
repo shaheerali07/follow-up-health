@@ -41,6 +41,7 @@ export default function SubmissionsTable({
           {row.grade}
         </span>
       ),
+      mobileHighlight: true,
     },
     {
       header: 'Inquiries',
@@ -51,27 +52,29 @@ export default function SubmissionsTable({
     {
       header: 'Revenue at Risk',
       accessor: (row: Submission) => (
-        <span className="text-sm text-slate">
+        <span className="text-sm text-slate font-medium">
           ${row.risk_low.toLocaleString()} - ${row.risk_high.toLocaleString()}
         </span>
       ),
+      mobileHighlight: true,
     },
     {
       header: 'Email',
       accessor: (row: Submission) => (
-        <span className="text-sm text-slate">{row.email || '-'}</span>
+        <span className="text-sm text-slate truncate max-w-[150px] block">{row.email || '-'}</span>
       ),
+      hideOnMobile: true,
     },
     {
       header: 'Actions',
       accessor: (row: Submission) => (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={(e) => {
               e.stopPropagation();
               onView(row);
             }}
-            className="text-sm text-teal hover:underline"
+            className="text-sm text-teal hover:underline font-medium"
           >
             View
           </button>
@@ -80,7 +83,7 @@ export default function SubmissionsTable({
               e.stopPropagation();
               onEdit(row);
             }}
-            className="text-sm text-navy hover:underline"
+            className="text-sm text-navy hover:underline font-medium"
           >
             Edit
           </button>
@@ -89,7 +92,7 @@ export default function SubmissionsTable({
               e.stopPropagation();
               onDelete(row);
             }}
-            className="text-sm text-red-600 hover:underline"
+            className="text-sm text-red-600 hover:underline font-medium"
           >
             Delete
           </button>
@@ -100,13 +103,12 @@ export default function SubmissionsTable({
   ];
 
   return (
-    <>
-      <DataTable
-        columns={columns}
-        data={submissions}
-        loading={loading}
-        emptyMessage="No submissions found"
-      />
-    </>
+    <DataTable
+      columns={columns}
+      data={submissions}
+      loading={loading}
+      emptyMessage="No submissions found"
+      mobileCardView={true}
+    />
   );
 }
