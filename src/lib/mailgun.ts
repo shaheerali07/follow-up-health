@@ -1,0 +1,138 @@
+import Mailgun from 'mailgun.js';
+import FormData from 'form-data';
+
+interface EmailData {
+  to: string;
+  subject: string;
+  html: string;
+}
+
+function getMailgunClient() {
+  const apiKey = process.env.MAILGUN_API_KEY;
+  if (!apiKey) {
+    return null;
+  }
+
+  const mailgun = new Mailgun(FormData);
+  return mailgun.client({
+    username: 'api',
+    key: apiKey,
+  });
+}
+
+export async function sendEmail({ to, subject, html }: EmailData): Promise<boolean> {
+  const domain = process.env.MAILGUN_DOMAIN;
+  const apiKey = process.env.MAILGUN_API_KEY;
+  const mg = getMailgunClient();
+
+  console.log('=== EMAIL DEBUG ===');
+  console.log('Domain:', domain);
+  console.log('API Key exists:', !!apiKey);
+  console.log('API Key prefix:', apiKey?.substring(0, 10) + '...');
+  console.log('Sending to:', to);
+  console.log('Subject:', subject);
+
+  if (!mg || !domain) {
+    console.warn('Mailgun not configured, skipping email send');
+    return false;
+  }
+
+  try {
+    const result = await mg.messages.create(domain, {
+      from: `Follow-Up Health <noreply@${domain}>`,
+      to: [to],
+      subject,
+      html,
+    });
+    console.log('Email sent successfully:', result);
+    return true;
+  } catch (error: unknown) {
+    console.error('Failed to send email:', error);
+    if (error && typeof error === 'object' && 'response' in error) {
+      const err = error as { response?: { body?: unknown } };
+      console.error('Mailgun response:', err.response?.body);
+    }
+    return false;
+  }
+}
+
+interface SnapshotEmailData {
+  grade: string;
+  riskLow: number;
+  riskHigh: number;
+  dropoffPercent: number;
+  drivers: string[];
+  scores: {
+    speed: number;
+    persistence: number;
+    coverage: number;
+  };
+}
+
+export function generateSnapshotHtml(data: SnapshotEmailData): string {
+  const driversList = data.drivers
+    .map((d) => `<li style="margin-bottom: 8px;">${d}</li>`)
+    .join('');
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: 'Inter', Arial, sans-serif; line-height: 1.6; color: #1E3A5F; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background-color: #F8FAFC; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
+        <h1 style="color: #1E3A5F; font-size: 24px; margin: 0 0 16px 0;">Your Follow-Up Health Snapshot</h1>
+
+        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+          <div style="background: white; border-radius: 8px; padding: 16px; flex: 1; min-width: 120px; text-align: center;">
+            <div style="font-size: 32px; font-weight: bold; color: #0D9488;">${data.grade}</div>
+            <div style="color: #64748B; font-size: 14px;">Grade</div>
+          </div>
+
+          <div style="background: white; border-radius: 8px; padding: 16px; flex: 2; min-width: 200px; text-align: center;">
+            <div style="font-size: 24px; font-weight: bold; color: #E11D48;">$${data.riskLow.toLocaleString()} - $${data.riskHigh.toLocaleString()}</div>
+            <div style="color: #64748B; font-size: 14px;">Monthly Revenue at Risk</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background-color: #F8FAFC; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
+        <h2 style="color: #1E3A5F; font-size: 18px; margin: 0 0 16px 0;">Top Leakage Drivers</h2>
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          ${driversList}
+        </ul>
+      </div>
+
+      <div style="background-color: #F8FAFC; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
+        <h2 style="color: #1E3A5F; font-size: 18px; margin: 0 0 16px 0;">Component Scores</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; color: #64748B;">Speed</td>
+            <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.scores.speed}/100</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #64748B;">Persistence</td>
+            <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.scores.persistence}/100</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #64748B;">Coverage</td>
+            <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.scores.coverage}/100</td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="text-align: center; margin-top: 24px;">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}" style="display: inline-block; background-color: #0D9488; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 500;">
+          Recalculate Your Score
+        </a>
+      </div>
+
+      <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #E2E8F0; text-align: center; color: #64748B; font-size: 12px;">
+        <p>This snapshot was generated by the Follow-Up Health Dashboard.</p>
+      </div>
+    </body>
+    </html>
+  `;
+}
