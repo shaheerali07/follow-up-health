@@ -38,7 +38,7 @@ export async function PUT(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { grade_range, subject, body: templateBody } = body;
+    const { grade_range, subject, body: templateBody, config } = body;
 
     // Validate grade_range
     const validRanges: GradeRange[] = ['A', 'BC', 'DF'];
@@ -56,15 +56,44 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Validate config is valid JSON if provided
+    let configJson: string | null = null;
+    if (config) {
+      try {
+        // Validate it's valid JSON by parsing
+        JSON.parse(typeof config === 'string' ? config : JSON.stringify(config));
+        configJson = typeof config === 'string' ? config : JSON.stringify(config);
+      } catch {
+        return NextResponse.json(
+          { error: 'Config must be valid JSON' },
+          { status: 400 }
+        );
+      }
+    }
+
     // Upsert template (INSERT ... ON CONFLICT)
+    // Note: config column may not exist yet, so we'll handle it gracefully
     const template = await queryOne<EmailTemplate>(
-      `INSERT INTO email_templates (grade_range, subject, body, updated_at)
-       VALUES ($1, $2, $3, NOW())
+      `INSERT INTO email_templates (grade_range, subject, body, config, updated_at)
+       VALUES ($1, $2, $3, $4, NOW())
        ON CONFLICT (grade_range)
-       DO UPDATE SET subject = $2, body = $3, updated_at = NOW()
+       DO UPDATE SET subject = $2, body = $3, config = $4, updated_at = NOW()
        RETURNING *`,
-      [grade_range, subject, templateBody]
-    );
+      [grade_range, subject, templateBody, configJson]
+    ).catch(async (error) => {
+      // If config column doesn't exist, try without it
+      if (error.message?.includes('column "config"')) {
+        return await queryOne<EmailTemplate>(
+          `INSERT INTO email_templates (grade_range, subject, body, updated_at)
+           VALUES ($1, $2, $3, NOW())
+           ON CONFLICT (grade_range)
+           DO UPDATE SET subject = $2, body = $3, updated_at = NOW()
+           RETURNING *`,
+          [grade_range, subject, templateBody]
+        );
+      }
+      throw error;
+    });
 
     return NextResponse.json({ template });
   } catch (error) {

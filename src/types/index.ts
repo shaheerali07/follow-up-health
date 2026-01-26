@@ -71,5 +71,6 @@ export interface EmailTemplate {
   grade_range: GradeRange;
   subject: string;
   body: string;
+  config?: string | null;
   updated_at: string;
 }

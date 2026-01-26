@@ -30,6 +30,7 @@ CREATE TABLE email_templates (
   grade_range TEXT UNIQUE NOT NULL, -- 'A', 'BC', 'DF'
   subject TEXT NOT NULL,
   body TEXT NOT NULL,
+  config JSONB, -- Optional JSON config for constants (e.g., CTA URL)
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 

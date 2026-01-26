@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, queryOne } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
-import { Submission } from '@/types';
+import { Submission, CalculatorInputs } from '@/types';
+import { calculateResults } from '@/lib/scoring';
+import { getTopDriverCodes } from '@/lib/drivers';
 
 // Check if user is authenticated via cookie
 async function isAuthorized(): Promise<boolean> {
@@ -115,5 +117,269 @@ export async function HEAD() {
     });
   } catch {
     return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 });
+  }
+}
+
+// Create a new submission (admin only)
+export async function POST(request: NextRequest) {
+  if (!(await isAuthorized())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const {
+      monthly_inquiries,
+      response_time,
+      follow_up_depth,
+      patient_value,
+      after_hours,
+      email,
+    } = body;
+
+    // Validate required fields
+    if (
+      !monthly_inquiries ||
+      !response_time ||
+      !follow_up_depth ||
+      !patient_value ||
+      !after_hours
+    ) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Validate input types
+    const validResponseTimes = ['under5', '5-30', '30-2h', 'sameday', 'nextday'];
+    const validFollowUpDepths = ['4-6', '2-3', '1', 'notsure'];
+    const validPatientValues = ['under250', '250-500', '500-1000', '1000+'];
+    const validAfterHours = ['yes', 'sometimes', 'no'];
+
+    if (
+      !validResponseTimes.includes(response_time) ||
+      !validFollowUpDepths.includes(follow_up_depth) ||
+      !validPatientValues.includes(patient_value) ||
+      !validAfterHours.includes(after_hours)
+    ) {
+      return NextResponse.json(
+        { error: 'Invalid input values' },
+        { status: 400 }
+      );
+    }
+
+    // Recalculate results server-side to ensure integrity
+    const inputs: CalculatorInputs = {
+      monthlyInquiries: parseInt(monthly_inquiries),
+      responseTime: response_time,
+      followUpDepth: follow_up_depth,
+      patientValue: patient_value,
+      afterHours: after_hours,
+    };
+
+    const results = calculateResults(inputs);
+    const drivers = getTopDriverCodes(inputs);
+
+    // Insert submission
+    const submission = await queryOne<Submission>(
+      `INSERT INTO submissions (
+        monthly_inquiries, response_time, follow_up_depth, patient_value,
+        after_hours, grade, loss_rate, dropoff_pct, risk_low, risk_high,
+        drivers, email
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      RETURNING *`,
+      [
+        inputs.monthlyInquiries,
+        inputs.responseTime,
+        inputs.followUpDepth,
+        inputs.patientValue,
+        inputs.afterHours,
+        results.grade,
+        results.lossRate,
+        results.dropoffPercent,
+        results.revenueAtRisk.low,
+        results.revenueAtRisk.high,
+        drivers,
+        email || null,
+      ]
+    );
+
+    return NextResponse.json({ submission }, { status: 201 });
+  } catch (error) {
+    console.error('Submission create error:', error);
+    return NextResponse.json(
+      { error: 'Failed to create submission' },
+      { status: 500 }
+    );
+  }
+}
+
+// Update an existing submission (admin only)
+export async function PUT(request: NextRequest) {
+  if (!(await isAuthorized())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const {
+      id,
+      monthly_inquiries,
+      response_time,
+      follow_up_depth,
+      patient_value,
+      after_hours,
+      email,
+    } = body;
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Submission ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate required fields
+    if (
+      !monthly_inquiries ||
+      !response_time ||
+      !follow_up_depth ||
+      !patient_value ||
+      !after_hours
+    ) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Validate input types
+    const validResponseTimes = ['under5', '5-30', '30-2h', 'sameday', 'nextday'];
+    const validFollowUpDepths = ['4-6', '2-3', '1', 'notsure'];
+    const validPatientValues = ['under250', '250-500', '500-1000', '1000+'];
+    const validAfterHours = ['yes', 'sometimes', 'no'];
+
+    if (
+      !validResponseTimes.includes(response_time) ||
+      !validFollowUpDepths.includes(follow_up_depth) ||
+      !validPatientValues.includes(patient_value) ||
+      !validAfterHours.includes(after_hours)
+    ) {
+      return NextResponse.json(
+        { error: 'Invalid input values' },
+        { status: 400 }
+      );
+    }
+
+    // Check if submission exists
+    const existing = await queryOne<Submission>(
+      'SELECT * FROM submissions WHERE id = $1',
+      [id]
+    );
+
+    if (!existing) {
+      return NextResponse.json(
+        { error: 'Submission not found' },
+        { status: 404 }
+      );
+    }
+
+    // Recalculate results server-side
+    const inputs: CalculatorInputs = {
+      monthlyInquiries: parseInt(monthly_inquiries),
+      responseTime: response_time,
+      followUpDepth: follow_up_depth,
+      patientValue: patient_value,
+      afterHours: after_hours,
+    };
+
+    const results = calculateResults(inputs);
+    const drivers = getTopDriverCodes(inputs);
+
+    // Update submission
+    const submission = await queryOne<Submission>(
+      `UPDATE submissions SET
+        monthly_inquiries = $1,
+        response_time = $2,
+        follow_up_depth = $3,
+        patient_value = $4,
+        after_hours = $5,
+        grade = $6,
+        loss_rate = $7,
+        dropoff_pct = $8,
+        risk_low = $9,
+        risk_high = $10,
+        drivers = $11,
+        email = $12
+      WHERE id = $13
+      RETURNING *`,
+      [
+        inputs.monthlyInquiries,
+        inputs.responseTime,
+        inputs.followUpDepth,
+        inputs.patientValue,
+        inputs.afterHours,
+        results.grade,
+        results.lossRate,
+        results.dropoffPercent,
+        results.revenueAtRisk.low,
+        results.revenueAtRisk.high,
+        drivers,
+        email || null,
+        id,
+      ]
+    );
+
+    return NextResponse.json({ submission });
+  } catch (error) {
+    console.error('Submission update error:', error);
+    return NextResponse.json(
+      { error: 'Failed to update submission' },
+      { status: 500 }
+    );
+  }
+}
+
+// Delete a submission (admin only)
+export async function DELETE(request: NextRequest) {
+  if (!(await isAuthorized())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Submission ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Check if submission exists
+    const existing = await queryOne<Submission>(
+      'SELECT * FROM submissions WHERE id = $1',
+      [id]
+    );
+
+    if (!existing) {
+      return NextResponse.json(
+        { error: 'Submission not found' },
+        { status: 404 }
+      );
+    }
+
+    // Delete submission
+    await query('DELETE FROM submissions WHERE id = $1', [id]);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Submission delete error:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete submission' },
+      { status: 500 }
+    );
   }
 }

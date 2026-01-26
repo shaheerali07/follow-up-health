@@ -58,8 +58,12 @@ export async function POST(request: NextRequest) {
       const gradeRange = getGradeRange(results.grade);
 
       // Try to fetch custom template from DB
-      const template = await queryOne<{ subject: string; body: string }>(
-        'SELECT subject, body FROM email_templates WHERE grade_range = $1',
+      const template = await queryOne<{
+        subject: string;
+        body: string;
+        config?: string | null;
+      }>(
+        'SELECT subject, body, config FROM email_templates WHERE grade_range = $1',
         [gradeRange]
       );
 
@@ -74,13 +78,35 @@ export async function POST(request: NextRequest) {
         scores: results.scores,
       });
 
+      // Parse config if available
+      let config: Record<string, string> = {};
+      if (template?.config) {
+        try {
+          config = JSON.parse(template.config);
+        } catch (e) {
+          console.error('Failed to parse template config:', e);
+        }
+      }
+
       // Use custom subject if available, otherwise use default
       const subject = template?.subject || `Your Follow-Up Health Score: ${results.grade}`;
+
+      // Use template body if available, otherwise use generated HTML
+      let emailHtml = snapshotHtml;
+      if (template?.body) {
+        emailHtml = template.body
+          .replace(/\{\{snapshot_html\}\}/g, snapshotHtml)
+          .replace(/\{\{cta_url\}\}/g, config.cta_url || process.env.NEXT_PUBLIC_APP_URL || '')
+          .replace(/\{\{grade\}\}/g, results.grade)
+          .replace(/\{\{risk_low\}\}/g, results.revenueAtRisk.low.toLocaleString())
+          .replace(/\{\{risk_high\}\}/g, results.revenueAtRisk.high.toLocaleString())
+          .replace(/\{\{dropoff_percent\}\}/g, results.dropoffPercent.toString());
+      }
 
       await sendEmail({
         to: email,
         subject,
-        html: snapshotHtml,
+        html: emailHtml,
       });
     }
 
