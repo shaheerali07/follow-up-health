@@ -119,7 +119,7 @@ export default function TemplateEditor({
                 }}
               />
             </div>
-            <details className="mt-2">
+            {/* <details className="mt-2">
               <summary className="text-xs text-black font-medium cursor-pointer py-2">
                 View available placeholders
               </summary>
@@ -130,7 +130,7 @@ export default function TemplateEditor({
                   <code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs">{`{{risk_high}}`}</code>
                 </div>
               </div>
-            </details>
+            </details> */}
           </div>
           <div className="flex flex-col-reverse sm:flex-row gap-2 pt-2">
             <button
