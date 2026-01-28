@@ -171,8 +171,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Recalculate results server-side to ensure integrity
+    const parsedMonthlyInquiries = parseInt(monthly_inquiries);
+    if (parsedMonthlyInquiries > 400) {
+      return NextResponse.json(
+        { error: 'Monthly patient inquiries must be 400 or less' },
+        { status: 400 }
+      );
+    }
+
     const inputs: CalculatorInputs = {
-      monthlyInquiries: parseInt(monthly_inquiries),
+      monthlyInquiries: parsedMonthlyInquiries,
       responseTime: response_time,
       followUpDepth: follow_up_depth,
       patientValue: patient_value,

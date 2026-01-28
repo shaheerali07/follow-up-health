@@ -180,9 +180,39 @@ export default function AdminPage() {
   const exportToCSV = () => {
     if (!submissions.length) return;
 
+    const RESPONSE_TIME_LABELS: Record<Submission['response_time'], string> = {
+      under5: 'Under 5 min',
+      '5-30': '5-30 min',
+      '30-2h': '30 min - 2 hrs',
+      sameday: 'Same day',
+      nextday: 'Next day+',
+    };
+
+    const FOLLOW_UP_LABELS: Record<Submission['follow_up_depth'], string> = {
+      '4-6': '4-6 touches',
+      '2-3': '2-3 touches',
+      '1': '1 touch',
+      notsure: 'Not sure',
+    };
+
+    const PATIENT_VALUE_LABELS: Record<Submission['patient_value'], string> = {
+      under250: 'Under $250',
+      '250-500': '$250-$500',
+      '500-1000': '$500-$1,000',
+      '1000+': '$1,000+',
+    };
+
+    const AFTER_HOURS_LABELS: Record<Submission['after_hours'], string> = {
+      yes: 'Yes',
+      sometimes: 'Sometimes',
+      no: 'No',
+    };
+
+    const csvEscape = (value: string) => `"${value.replace(/"/g, '""')}"`;
+
     const headers = [
       'Date',
-      'Monthly Inquiries',
+      'Monthly Patient Inquiries',
       'Response Time',
       'Follow-up Depth',
       'Patient Value',
@@ -195,12 +225,12 @@ export default function AdminPage() {
     ];
 
     const rows = submissions.map((s) => [
-      new Date(s.created_at).toISOString(),
+      new Date(s.created_at).toLocaleString(),
       s.monthly_inquiries,
-      s.response_time,
-      s.follow_up_depth,
-      s.patient_value,
-      s.after_hours,
+      RESPONSE_TIME_LABELS[s.response_time],
+      FOLLOW_UP_LABELS[s.follow_up_depth],
+      PATIENT_VALUE_LABELS[s.patient_value],
+      AFTER_HOURS_LABELS[s.after_hours],
       s.grade,
       s.loss_rate,
       s.risk_low,
@@ -208,7 +238,14 @@ export default function AdminPage() {
       s.email || '',
     ]);
 
-    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const csv = [
+      headers.map(csvEscape).join(','),
+      ...rows.map((row) =>
+        row
+          .map((value) => csvEscape(String(value ?? '')))
+          .join(',')
+      ),
+    ].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
 

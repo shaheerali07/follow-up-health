@@ -1,6 +1,6 @@
 'use client';
 
-import { Submission } from '@/types';
+import { Submission, ResponseTime, FollowUpDepth, PatientValue, AfterHoursCoverage } from '@/types';
 import Modal from '../shared/Modal';
 
 interface SubmissionDetailModalProps {
@@ -15,6 +15,34 @@ export default function SubmissionDetailModal({
   onEdit,
 }: SubmissionDetailModalProps) {
   if (!submission) return null;
+
+  const RESPONSE_TIME_LABELS: Record<ResponseTime, string> = {
+    under5: 'Under 5 min',
+    '5-30': '5-30 min',
+    '30-2h': '30 min - 2 hrs',
+    sameday: 'Same day',
+    nextday: 'Next day+',
+  };
+
+  const FOLLOW_UP_LABELS: Record<FollowUpDepth, string> = {
+    '4-6': '4-6 touches',
+    '2-3': '2-3 touches',
+    '1': '1 touch',
+    notsure: 'Not sure',
+  };
+
+  const PATIENT_VALUE_LABELS: Record<PatientValue, string> = {
+    under250: 'Under $250',
+    '250-500': '$250-$500',
+    '500-1000': '$500-$1,000',
+    '1000+': '$1,000+',
+  };
+
+  const AFTER_HOURS_LABELS: Record<AfterHoursCoverage, string> = {
+    yes: 'Yes',
+    sometimes: 'Sometimes',
+    no: 'No',
+  };
 
   const getGradeColor = (grade: string) => {
     if (grade.startsWith('A')) return 'bg-emerald-100 text-emerald-700';
@@ -34,7 +62,7 @@ export default function SubmissionDetailModal({
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <p className="text-sm text-black">Monthly Inquiries</p>
+            <p className="text-sm text-black">Monthly Patient Inquiries</p>
             <p className="text-navy font-medium">{submission.monthly_inquiries}</p>
           </div>
           <div>
@@ -46,20 +74,34 @@ export default function SubmissionDetailModal({
             </span>
           </div>
           <div>
-            <p className="text-sm text-black">Response Time</p>
-            <p className="text-navy font-medium">{submission.response_time}</p>
+            <p className="text-sm text-black">
+              How fast do you typically respond to new patient inquiries?
+            </p>
+            <p className="text-navy font-medium">
+              {RESPONSE_TIME_LABELS[submission.response_time]}
+            </p>
           </div>
           <div>
-            <p className="text-sm text-black">Follow-up Depth</p>
-            <p className="text-navy font-medium">{submission.follow_up_depth}</p>
+            <p className="text-sm text-black">
+              How many follow-up touches do you make before giving up?
+            </p>
+            <p className="text-navy font-medium">
+              {FOLLOW_UP_LABELS[submission.follow_up_depth]}
+            </p>
           </div>
           <div>
-            <p className="text-sm text-black">Patient Value</p>
-            <p className="text-navy font-medium">{submission.patient_value}</p>
+            <p className="text-sm text-black">What&apos;s your average patient lifetime value?</p>
+            <p className="text-navy font-medium">
+              {PATIENT_VALUE_LABELS[submission.patient_value]}
+            </p>
           </div>
           <div>
-            <p className="text-sm text-black">After Hours</p>
-            <p className="text-navy font-medium">{submission.after_hours}</p>
+            <p className="text-sm text-black">
+              Do you respond to inquiries after hours (evenings/weekends)?
+            </p>
+            <p className="text-navy font-medium">
+              {AFTER_HOURS_LABELS[submission.after_hours]}
+            </p>
           </div>
           <div>
             <p className="text-sm text-black">Loss Rate</p>

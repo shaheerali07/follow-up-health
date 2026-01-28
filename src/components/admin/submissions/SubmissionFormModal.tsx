@@ -46,7 +46,9 @@ export default function SubmissionFormModal({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-navy mb-1">Monthly Inquiries</label>
+          <label className="block text-sm font-medium text-navy mb-1">
+            Monthly Patient Inquiries
+          </label>
           <input
             type="number"
             value={formData.monthly_inquiries}
@@ -55,11 +57,14 @@ export default function SubmissionFormModal({
             }
             className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal"
             min="1"
+            max="400"
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-navy mb-1">Response Time</label>
+          <label className="block text-sm font-medium text-navy mb-1">
+            How fast do you typically respond to new patient inquiries?
+          </label>
           <select
             value={formData.response_time}
             onChange={(e) =>
@@ -76,7 +81,9 @@ export default function SubmissionFormModal({
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-navy mb-1">Follow-up Depth</label>
+          <label className="block text-sm font-medium text-navy mb-1">
+            How many follow-up touches do you make before giving up?
+          </label>
           <select
             value={formData.follow_up_depth}
             onChange={(e) =>
@@ -92,7 +99,9 @@ export default function SubmissionFormModal({
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-navy mb-1">Patient Value</label>
+          <label className="block text-sm font-medium text-navy mb-1">
+            What&apos;s your average patient lifetime value?
+          </label>
           <select
             value={formData.patient_value}
             onChange={(e) =>
@@ -108,7 +117,9 @@ export default function SubmissionFormModal({
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-navy mb-1">After Hours</label>
+          <label className="block text-sm font-medium text-navy mb-1">
+            Do you respond to inquiries after hours (evenings/weekends)?
+          </label>
           <select
             value={formData.after_hours}
             onChange={(e) =>

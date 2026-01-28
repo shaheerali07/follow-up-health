@@ -24,6 +24,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (inputs.monthlyInquiries > 400) {
+      return NextResponse.json(
+        { error: 'Monthly patient inquiries must be 400 or less' },
+        { status: 400 }
+      );
+    }
+
     // Store submission in database
     try {
       await query(
