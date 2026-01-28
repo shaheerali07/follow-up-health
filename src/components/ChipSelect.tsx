@@ -19,17 +19,17 @@ export default function ChipSelect<T extends string>({
   label,
 }: ChipSelectProps<T>) {
   return (
-    <div className="space-y-3">
-      <label className="block text-sm font-medium text-navy">{label}</label>
-      <div className="flex flex-wrap gap-2">
+    <div className="space-y-2">
+      <label className="block text-xs font-medium text-navy">{label}</label>
+      <div className="flex flex-wrap gap-1.5">
         {options.map((option) => (
           <button
             key={option.value}
             onClick={() => onChange(option.value)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
               value === option.value
-                ? 'bg-teal text-white shadow-md'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-teal text-white shadow-sm'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
             {option.label}

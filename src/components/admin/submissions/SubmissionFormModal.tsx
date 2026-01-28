@@ -151,7 +151,7 @@ export default function SubmissionFormModal({
             type="button"
             onClick={onClose}
             disabled={isSaving}
-            className="px-4 py-2 bg-white border border-gray-200 text-slate rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-white border border-gray-200 text-black rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             Cancel
           </button>

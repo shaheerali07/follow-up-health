@@ -151,10 +151,9 @@ export function calculateGrade(
 export function calculateSeverity(lossRate: number): SeverityLevel {
   const dropoffPercent = Math.round(lossRate * 100);
 
-  if (dropoffPercent <= 7) return 'Low';
-  if (dropoffPercent <= 12) return 'Moderate';
-  if (dropoffPercent <= 18) return 'High';
-  return 'Severe';
+  if (dropoffPercent <= 7) return 'Quiet Leak';
+  if (dropoffPercent <= 12) return 'Slow Leak';
+  return 'Active Leak';
 }
 
 /**

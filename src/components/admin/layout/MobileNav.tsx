@@ -14,7 +14,7 @@ export default function MobileNav({ activeModule, onModuleChange }: MobileNavPro
           className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors whitespace-nowrap ${
             activeModule === 'submissions'
               ? 'bg-teal text-white font-medium shadow-sm'
-              : 'bg-gray-100 text-slate hover:bg-gray-200'
+              : 'bg-gray-100 text-black hover:bg-gray-200'
           }`}
         >
           <svg
@@ -37,7 +37,7 @@ export default function MobileNav({ activeModule, onModuleChange }: MobileNavPro
           className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors whitespace-nowrap ${
             activeModule === 'templates'
               ? 'bg-teal text-white font-medium shadow-sm'
-              : 'bg-gray-100 text-slate hover:bg-gray-200'
+              : 'bg-gray-100 text-black hover:bg-gray-200'
           }`}
         >
           <svg

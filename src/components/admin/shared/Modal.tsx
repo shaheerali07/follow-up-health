@@ -35,7 +35,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = '2x
             <h2 className="text-xl sm:text-2xl font-bold text-navy">{title}</h2>
             <button
               onClick={onClose}
-              className="text-slate hover:text-navy text-2xl leading-none"
+              className="text-black hover:text-navy text-2xl leading-none"
               aria-label="Close"
             >
               ✕

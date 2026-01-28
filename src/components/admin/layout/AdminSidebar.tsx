@@ -14,7 +14,7 @@ export default function AdminSidebar({ activeModule, onModuleChange }: AdminSide
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
             activeModule === 'submissions'
               ? 'bg-teal-50 text-teal font-medium'
-              : 'text-slate hover:bg-gray-50'
+              : 'text-black hover:bg-gray-50'
           }`}
         >
           <svg
@@ -37,7 +37,7 @@ export default function AdminSidebar({ activeModule, onModuleChange }: AdminSide
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
             activeModule === 'templates'
               ? 'bg-teal-50 text-teal font-medium'
-              : 'text-slate hover:bg-gray-50'
+              : 'text-black hover:bg-gray-50'
           }`}
         >
           <svg

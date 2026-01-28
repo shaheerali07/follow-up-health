@@ -18,7 +18,7 @@ export interface RevenueAtRisk {
   high: number;
 }
 
-export type SeverityLevel = 'Low' | 'Moderate' | 'High' | 'Severe';
+export type SeverityLevel = 'Quiet Leak' | 'Slow Leak' | 'Active Leak';
 
 export interface ComponentScores {
   speed: number;

@@ -96,12 +96,12 @@ export default function AdminLoginPage() {
       <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 w-full max-w-md">
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-xl sm:text-2xl font-bold text-navy mb-2">Welcome</h1>
-          <p className="text-slate text-sm">Sign in to access the Dashboard</p>
+          <p className="text-black text-sm">Sign in to access the Dashboard</p>
         </div>
 
         <Suspense
           fallback={
-            <div className="flex items-center justify-center py-6 text-slate">
+            <div className="flex items-center justify-center py-6 text-black">
               <Spinner size={22} color="#0f766e" />
             </div>
           }

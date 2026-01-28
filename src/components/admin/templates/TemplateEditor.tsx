@@ -120,13 +120,11 @@ export default function TemplateEditor({
               />
             </div>
             <details className="mt-2">
-              <summary className="text-xs text-slate font-medium cursor-pointer py-2">
+              <summary className="text-xs text-black font-medium cursor-pointer py-2">
                 View available placeholders
               </summary>
               <div className="mt-2 p-3 bg-gray-50 rounded-lg">
                 <div className="flex flex-wrap gap-1.5">
-                  <code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs">{`{{snapshot_html}}`}</code>
-                  <code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs">{`{{cta_url}}`}</code>
                   <code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs">{`{{grade}}`}</code>
                   <code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs">{`{{risk_low}}`}</code>
                   <code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs">{`{{risk_high}}`}</code>
@@ -138,7 +136,7 @@ export default function TemplateEditor({
             <button
               onClick={onCancel}
               disabled={isSaving}
-              className="w-full sm:w-auto px-4 py-2.5 bg-white border border-gray-200 text-slate rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed text-sm font-medium"
+              className="w-full sm:w-auto px-4 py-2.5 bg-white border border-gray-200 text-black rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed text-sm font-medium"
             >
               Cancel
             </button>
@@ -163,22 +161,22 @@ export default function TemplateEditor({
           {template ? (
             <>
               <div className="mb-3">
-                <span className="text-xs text-slate uppercase tracking-wide">Subject</span>
+                <span className="text-xs text-black uppercase tracking-wide">Subject</span>
                 <p className="text-sm text-navy font-medium mt-0.5">{template.subject}</p>
               </div>
               <div className="mb-3">
-                <span className="text-xs text-slate uppercase tracking-wide">Content</span>
+                <span className="text-xs text-black uppercase tracking-wide">Content</span>
                 <div
-                  className="text-sm text-slate break-words prose prose-sm max-w-none mt-1 p-3 bg-gray-50 rounded-lg"
+                  className="text-sm text-black break-words prose prose-sm max-w-none mt-1 p-3 bg-gray-50 rounded-lg"
                   dangerouslySetInnerHTML={{ __html: template.body || '' }}
                 />
               </div>
-              <p className="text-xs text-slate/60">
+              <p className="text-xs text-black/60">
                 Updated: {new Date(template.updated_at).toLocaleDateString()}
               </p>
             </>
           ) : (
-            <p className="text-sm text-slate">
+            <p className="text-sm text-black">
               No template configured. Click Edit to create one.
             </p>
           )}

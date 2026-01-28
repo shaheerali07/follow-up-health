@@ -27,18 +27,18 @@ export default function SubmissionDetailModal({
     <Modal isOpen={!!submission} onClose={onClose} title="Submission Details">
       <div className="space-y-4">
         <div>
-          <p className="text-sm text-slate">Date</p>
+          <p className="text-sm text-black">Date</p>
           <p className="text-navy font-medium">
             {new Date(submission.created_at).toLocaleString()}
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <p className="text-sm text-slate">Monthly Inquiries</p>
+            <p className="text-sm text-black">Monthly Inquiries</p>
             <p className="text-navy font-medium">{submission.monthly_inquiries}</p>
           </div>
           <div>
-            <p className="text-sm text-slate">Grade</p>
+            <p className="text-sm text-black">Grade</p>
             <span
               className={`inline-flex px-2 py-1 rounded text-sm font-medium ${getGradeColor(submission.grade)}`}
             >
@@ -46,43 +46,43 @@ export default function SubmissionDetailModal({
             </span>
           </div>
           <div>
-            <p className="text-sm text-slate">Response Time</p>
+            <p className="text-sm text-black">Response Time</p>
             <p className="text-navy font-medium">{submission.response_time}</p>
           </div>
           <div>
-            <p className="text-sm text-slate">Follow-up Depth</p>
+            <p className="text-sm text-black">Follow-up Depth</p>
             <p className="text-navy font-medium">{submission.follow_up_depth}</p>
           </div>
           <div>
-            <p className="text-sm text-slate">Patient Value</p>
+            <p className="text-sm text-black">Patient Value</p>
             <p className="text-navy font-medium">{submission.patient_value}</p>
           </div>
           <div>
-            <p className="text-sm text-slate">After Hours</p>
+            <p className="text-sm text-black">After Hours</p>
             <p className="text-navy font-medium">{submission.after_hours}</p>
           </div>
           <div>
-            <p className="text-sm text-slate">Loss Rate</p>
+            <p className="text-sm text-black">Loss Rate</p>
             <p className="text-navy font-medium">{(submission.loss_rate * 100).toFixed(1)}%</p>
           </div>
           <div>
-            <p className="text-sm text-slate">Drop-off %</p>
+            <p className="text-sm text-black">Drop-off %</p>
             <p className="text-navy font-medium">{submission.dropoff_pct}%</p>
           </div>
           <div>
-            <p className="text-sm text-slate">Revenue at Risk (Low)</p>
+            <p className="text-sm text-black">Revenue at Risk (Low)</p>
             <p className="text-navy font-medium">${submission.risk_low.toLocaleString()}</p>
           </div>
           <div>
-            <p className="text-sm text-slate">Revenue at Risk (High)</p>
+            <p className="text-sm text-black">Revenue at Risk (High)</p>
             <p className="text-navy font-medium">${submission.risk_high.toLocaleString()}</p>
           </div>
           <div className="col-span-1 sm:col-span-2">
-            <p className="text-sm text-slate">Email</p>
+            <p className="text-sm text-black">Email</p>
             <p className="text-navy font-medium">{submission.email || 'No email provided'}</p>
           </div>
           <div className="col-span-1 sm:col-span-2">
-            <p className="text-sm text-slate">Drivers</p>
+            <p className="text-sm text-black">Drivers</p>
             <div className="flex flex-wrap gap-2 mt-1">
               {submission.drivers.map((driver, idx) => (
                 <span
@@ -107,7 +107,7 @@ export default function SubmissionDetailModal({
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-white border border-gray-200 text-slate rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-4 py-2 bg-white border border-gray-200 text-black rounded-lg hover:bg-gray-50 transition-colors"
           >
             Close
           </button>

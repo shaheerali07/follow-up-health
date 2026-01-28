@@ -17,8 +17,8 @@ export default function Pagination({
 
   return (
     <div className="mt-4 px-4 py-3 rounded-xl border border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3 bg-white shadow-sm">
-      <p className="text-xs sm:text-sm text-slate text-center sm:text-left">
-        Page {currentPage} of {totalPages} <span className="text-slate/60">({total} total)</span>
+      <p className="text-xs sm:text-sm text-black text-center sm:text-left">
+        Page {currentPage} of {totalPages} <span className="text-black/60">({total} total)</span>
       </p>
       <div className="flex gap-2 w-full sm:w-auto">
         <button

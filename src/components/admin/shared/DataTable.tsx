@@ -32,7 +32,7 @@ export default function DataTable<T extends { id: string }>({
   if (loading) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-8 flex items-center justify-center text-slate">
+        <div className="p-8 flex items-center justify-center text-black">
           <Spinner size={24} color="#0f766e" />
         </div>
       </div>
@@ -42,7 +42,7 @@ export default function DataTable<T extends { id: string }>({
   if (data.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-8 text-center text-slate">{emptyMessage}</div>
+        <div className="p-8 text-center text-black">{emptyMessage}</div>
       </div>
     );
   }
@@ -80,7 +80,7 @@ export default function DataTable<T extends { id: string }>({
               .filter((col) => !col.mobileHighlight && col.header !== 'Actions')
               .map((column, index) => (
                 <div key={index}>
-                  <span className="text-slate text-xs">{column.header}</span>
+                  <span className="text-black text-xs">{column.header}</span>
                   <div className="text-navy">{getCellContent(row, column)}</div>
                 </div>
               ))}
@@ -129,7 +129,7 @@ export default function DataTable<T extends { id: string }>({
                   {columns.map((column, index) => (
                     <td
                       key={index}
-                      className={`px-3 sm:px-4 py-3 text-xs sm:text-sm text-slate ${
+                      className={`px-3 sm:px-4 py-3 text-xs sm:text-sm text-black ${
                         column.className || ''
                       } ${column.hideOnMobile ? 'hidden md:table-cell' : ''}`}
                     >

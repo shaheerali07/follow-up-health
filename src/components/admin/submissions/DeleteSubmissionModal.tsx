@@ -20,7 +20,7 @@ export default function DeleteSubmissionModal({
   return (
     <Modal isOpen={!!submission} onClose={onClose} title="Delete Submission" maxWidth="md">
       <div>
-        <p className="text-slate mb-6">
+        <p className="text-black mb-6">
           Are you sure you want to delete this submission? This action cannot be undone.
         </p>
         <div className="flex flex-col sm:flex-row gap-2">
@@ -41,7 +41,7 @@ export default function DeleteSubmissionModal({
           <button
             onClick={onClose}
             disabled={isDeleting}
-            className="px-4 py-2 bg-white border border-gray-200 text-slate rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-white border border-gray-200 text-black rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             Cancel
           </button>

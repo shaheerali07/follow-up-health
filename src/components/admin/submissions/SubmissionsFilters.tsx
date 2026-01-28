@@ -46,7 +46,7 @@ export default function SubmissionsFilters({
         <div className="flex flex-col sm:flex-row gap-3 sm:items-end flex-1">
           <div className="flex gap-3 flex-1 sm:flex-none items-end">
             <div className="flex-1 sm:flex-none">
-              <label className="block text-xs font-medium text-slate mb-1">Grade</label>
+              <label className="block text-xs font-medium text-black mb-1">Grade</label>
               <select
                 value={filterGrade}
                 onChange={(e) => onGradeChange(e.target.value)}
@@ -61,7 +61,7 @@ export default function SubmissionsFilters({
               </select>
             </div>
             <div className="flex-1 sm:flex-none">
-              <label className="block text-xs font-medium text-slate mb-1">Email</label>
+              <label className="block text-xs font-medium text-black mb-1">Email</label>
               <select
                 value={filterEmail}
                 onChange={(e) => onEmailChange(e.target.value)}

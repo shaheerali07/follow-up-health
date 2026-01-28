@@ -4,8 +4,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { Submission, CalculatorInputs } from '@/types';
 import { calculateResults, getGradeRange } from '@/lib/scoring';
 import { getTopDriverCodes } from '@/lib/drivers';
-import { sendEmail, generateSnapshotBlock, buildEmailHtml } from '@/lib/mailgun';
-import { DRIVERS } from '@/lib/drivers';
+import { sendEmail, buildEmailHtml } from '@/lib/mailgun';
 
 // Check if user is authenticated via cookie
 async function isAuthorized(): Promise<boolean> {
@@ -231,9 +230,8 @@ export async function POST(request: NextRequest) {
         const template = await queryOne<{
           subject: string;
           body: string;
-          config?: string | null;
         }>(
-          'SELECT subject, body, config FROM email_templates WHERE grade_range = $1',
+          'SELECT subject, body FROM email_templates WHERE grade_range = $1',
           [gradeRange]
         );
 
@@ -241,29 +239,6 @@ export async function POST(request: NextRequest) {
           console.log(`[${timestamp}] [ADMIN] Template found for grade range ${gradeRange}`);
         } else {
           console.log(`[${timestamp}] [ADMIN] No template found for grade range ${gradeRange}, using defaults`);
-        }
-
-        const driverTitles = drivers.map((code) => DRIVERS[code].title);
-        const snapshotBlock = generateSnapshotBlock({
-          grade: results.grade,
-          riskLow: results.revenueAtRisk.low,
-          riskHigh: results.revenueAtRisk.high,
-          dropoffPercent: results.dropoffPercent,
-          drivers: driverTitles,
-          scores: results.scores,
-        });
-
-        let ctaUrl = process.env.NEXT_PUBLIC_APP_URL || '';
-        if (template?.config) {
-          try {
-            const config = JSON.parse(template.config) as Record<string, string>;
-            if (config.cta_url) {
-              ctaUrl = config.cta_url;
-              console.log(`[${timestamp}] [ADMIN] Using custom CTA URL from template config`);
-            }
-          } catch {
-            console.warn(`[${timestamp}] [ADMIN] Failed to parse template config, using default CTA URL`);
-          }
         }
 
         const subject = template?.subject ?? `Your Follow-Up Health Score: ${results.grade}`;
@@ -274,8 +249,6 @@ export async function POST(request: NextRequest) {
 
         const emailHtml = buildEmailHtml({
           customContent,
-          snapshotBlock,
-          ctaUrl,
           placeholders: {
             grade: results.grade,
             risk_low: results.revenueAtRisk.low.toLocaleString(),

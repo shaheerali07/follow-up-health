@@ -57,7 +57,7 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
             </div>
             <span className="text-sm text-navy hidden sm:block">{user.name}</span>
             <svg
-              className={`w-4 h-4 text-slate transition-transform flex-shrink-0 ${
+              className={`w-4 h-4 text-black transition-transform flex-shrink-0 ${
                 showProfileDropdown ? 'rotate-180' : ''
               }`}
               fill="none"
@@ -76,11 +76,11 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
               <div className="px-4 py-2 border-b border-gray-100">
                 <p className="text-sm font-medium text-navy">{user.name}</p>
-                <p className="text-xs text-slate truncate">{user.email}</p>
+                <p className="text-xs text-black truncate">{user.email}</p>
               </div>
               <button
                 onClick={handleLogout}
-                className="w-full text-left px-4 py-2 text-sm text-slate hover:bg-gray-50 transition-colors"
+                className="w-full text-left px-4 py-2 text-sm text-black hover:bg-gray-50 transition-colors"
               >
                 Logout
               </button>

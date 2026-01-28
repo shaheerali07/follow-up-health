@@ -367,7 +367,7 @@ export default function AdminPage() {
               <h2 className="text-xl sm:text-2xl font-bold text-navy mb-2">
                 {activeModule === 'submissions' ? 'Submissions' : 'Email Templates'}
               </h2>
-              <p className="text-sm text-slate">
+              <p className="text-sm text-black">
                 {activeModule === 'submissions'
                   ? 'Manage and view all calculator submissions'
                   : 'Manage email templates for different grade ranges'}

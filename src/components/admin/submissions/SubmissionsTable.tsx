@@ -29,7 +29,7 @@ export default function SubmissionsTable({
     {
       header: 'Date',
       accessor: (row: Submission) => (
-        <span className="text-sm text-slate">
+        <span className="text-sm text-black">
           {new Date(row.created_at).toLocaleDateString()}
         </span>
       ),
@@ -46,13 +46,13 @@ export default function SubmissionsTable({
     {
       header: 'Inquiries',
       accessor: (row: Submission) => (
-        <span className="text-sm text-slate">{row.monthly_inquiries}</span>
+        <span className="text-sm text-black">{row.monthly_inquiries}</span>
       ),
     },
     {
       header: 'Revenue at Risk',
       accessor: (row: Submission) => (
-        <span className="text-sm text-slate font-medium">
+        <span className="text-sm text-black font-medium">
           ${row.risk_low.toLocaleString()} - ${row.risk_high.toLocaleString()}
         </span>
       ),
@@ -61,7 +61,7 @@ export default function SubmissionsTable({
     {
       header: 'Email',
       accessor: (row: Submission) => (
-        <span className="text-sm text-slate truncate max-w-[150px] block">{row.email || '-'}</span>
+        <span className="text-sm text-black truncate max-w-[150px] block">{row.email || '-'}</span>
       ),
       hideOnMobile: true,
     },

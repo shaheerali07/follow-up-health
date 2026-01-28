@@ -39,43 +39,45 @@ export default function CalculatorPage() {
     <div className="min-h-screen bg-[#F8FAFC]">
       {/* Header */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-navy">
+              <h1 className="text-lg sm:text-xl font-bold text-navy">
                 Follow-Up Health Dashboard
               </h1>
-              <p className="text-sm text-slate hidden sm:block">
+              <p className="text-xs text-black hidden sm:block">
                 Assess your clinic&apos;s follow-up operations
               </p>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-teal-50 rounded-full">
-              <span className="w-2 h-2 bg-teal rounded-full animate-pulse"></span>
-              <span className="text-sm font-medium text-teal">Live Results</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-teal-50 rounded-full">
+              <span className="w-1.5 h-1.5 bg-teal rounded-full animate-pulse"></span>
+              <span className="text-xs font-medium text-teal">Live Results</span>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column - Inputs */}
-          <div className="lg:sticky lg:top-24 lg:self-start">
-            <InputsPanel inputs={inputs} onChange={handleInputChange} />
-          </div>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 items-start">
+            {/* Left Column - Inputs */}
+            <div className="lg:col-span-5 lg:sticky lg:top-[4rem] border-r border-gray-200">
+              <InputsPanel inputs={inputs} onChange={handleInputChange} />
+            </div>
 
-          {/* Right Column - Results */}
-          <div ref={resultsRef}>
-            <ResultsDashboard inputs={inputs} results={results} />
+            {/* Right Column - Results */}
+            <div ref={resultsRef} className="lg:col-span-7 p-5">
+              <ResultsDashboard inputs={inputs} results={results} />
+            </div>
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-100 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <p className="text-sm text-slate text-center">
+      <footer className="bg-white border-t border-gray-100 mt-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <p className="text-xs text-black text-center">
             © {new Date().getFullYear()} Follow-Up Health Dashboard. All calculations are estimates based on industry benchmarks.
           </p>
         </div>
